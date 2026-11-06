@@ -1,6 +1,6 @@
-name: Build iOS IPA (macos-15)
+name: Build iOS IPA (macos-latest)
 
-# 精简工作流：只跑 iOS 一个 job，跳过 checks / android / windows / web / macOS，
+# 精简工作流：只跑 iOS 一个 job（runner 用 macos-latest，与稳定成功路径一致），跳过 checks / android / windows / web / macOS，
 # 最大限度节省 macOS runner（10 倍计费）额度。
 # 产物：dist/ios/zhenguojian-<版本>-ios-unsigned.ipa
 #
@@ -14,10 +14,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ios-only-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   GOPROXY: https://proxy.golang.org,direct
   GOSUMDB: sum.golang.org
@@ -26,7 +22,7 @@ env:
 jobs:
   ios:
     name: Build unsigned iOS IPA (真果鉴 · 跟随上游)
-    runs-on: macos-15
+    runs-on: macos-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
