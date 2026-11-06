@@ -212,7 +212,7 @@ class ExplorePageState extends State<ExplorePage> {
               ),
             if (hero != null)
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(inset, phone ? 12 : 16, inset, 0),
+                padding: EdgeInsets.fromLTRB(inset, phone ? 8 : 16, inset, 0),
                 sliver: SliverToBoxAdapter(child: hero),
               ),
             SliverPadding(
@@ -230,7 +230,8 @@ class ExplorePageState extends State<ExplorePage> {
                 inset,
                 8,
                 inset,
-                television ? 27 : 16,
+                // 底部留出悬浮胶囊导航的空间。
+                television ? 27 : (phone ? 100 : 16),
               ),
               sliver: SliverToBoxAdapter(child: FeedFooter(feed: feed)),
             ),
@@ -258,6 +259,12 @@ class ExplorePageState extends State<ExplorePage> {
   }
 
   Widget? _hero(ExploreFeed explore) {
+    final items = explore.items;
+    // 轮播取当前分类列表的前几部，每部都是真实剧集，可左右滑动查看。
+    List<Drama> slides(Drama lead) => [
+      lead,
+      ...items.where((d) => d.id != lead.id),
+    ].take(6).toList();
     if (explore.resume case final entry?) {
       final drama = entry.drama;
       final total = drama.episodes;
@@ -266,6 +273,7 @@ class ExplorePageState extends State<ExplorePage> {
           : entry.episode;
       return ExploreHero(
         drama: drama,
+        carousel: slides(drama),
         kicker: '继续观看',
         meta: total > 0
             ? '看到第 ${entry.episode} 集 · 共 $total 集'
@@ -274,11 +282,13 @@ class ExplorePageState extends State<ExplorePage> {
         action: '继续第 $next 集',
         onPlay: () => _open(drama),
         onDetail: () => _open(drama),
+        onOpen: _open,
       );
     }
     if (explore.featured case final drama?) {
       return ExploreHero(
         drama: drama,
+        carousel: slides(drama),
         kicker: '今日推荐',
         meta: [
           if (drama.category.isNotEmpty) drama.category,
@@ -287,6 +297,7 @@ class ExplorePageState extends State<ExplorePage> {
         action: '立即观看',
         onPlay: () => _open(drama),
         onDetail: () => _open(drama),
+        onOpen: _open,
       );
     }
     return null;
